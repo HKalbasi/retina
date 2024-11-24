@@ -9,6 +9,7 @@ include!(concat!(env!("OUT_DIR"), "/dpdk.rs"));
 
 use std::os::raw::{c_char, c_int, c_uint, c_void};
 
+#[cfg(not(dpdk_ge_2311))]
 impl std::fmt::Debug for rte_gtp_psc_generic_hdr {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         f.debug_struct("rte_gtp_psc_generic_hdr")
@@ -32,6 +33,8 @@ impl rte_ipv4_hdr {
     }
 }
 
+#[cfg(dpdk_ge_2311)]
+pub use rte_eth_fc_mode_RTE_ETH_FC_NONE as rte_eth_fc_mode_RTE_FC_NONE;
 #[cfg(dpdk_ge_2311)]
 pub use rte_eth_rx_mq_mode_RTE_ETH_MQ_RX_RSS as rte_eth_rx_mq_mode_ETH_MQ_RX_RSS;
 #[cfg(dpdk_ge_2311)]

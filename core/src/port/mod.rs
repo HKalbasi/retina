@@ -232,7 +232,7 @@ impl Port {
 
         // reset flow control config, set to disabled
         let mut fc_conf: dpdk::rte_eth_fc_conf = unsafe { mem::zeroed() };
-        fc_conf.mode = dpdk::rte_eth_fc_mode_RTE_ETH_FC_NONE;
+        fc_conf.mode = dpdk::rte_eth_fc_mode_RTE_FC_NONE;
         let ret = unsafe { dpdk::rte_eth_dev_flow_ctrl_set(self.id.raw(), &mut fc_conf) };
         if ret != 0 {
             log::warn!("Failure disabling flow control.");
