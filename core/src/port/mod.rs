@@ -19,11 +19,12 @@ use std::ptr;
 
 use anyhow::{bail, Result};
 
-const RSS_KEY_LEN: usize = 40;
+const RSS_KEY_LEN: usize = 52;
 pub(crate) const SYMMETRIC_RSS_KEY: [u8; RSS_KEY_LEN] = [
     0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
     0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
-    0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+    0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A, 0x6D, 0x5A,
+    0x6D, 0x5A, 0x6D, 0x5A,
 ];
 const RSS_RETA_SIZE: usize = 512;
 
@@ -231,7 +232,7 @@ impl Port {
 
         // reset flow control config, set to disabled
         let mut fc_conf: dpdk::rte_eth_fc_conf = unsafe { mem::zeroed() };
-        fc_conf.mode = dpdk::rte_eth_fc_mode_RTE_FC_NONE;
+        fc_conf.mode = dpdk::rte_eth_fc_mode_RTE_ETH_FC_NONE;
         let ret = unsafe { dpdk::rte_eth_dev_flow_ctrl_set(self.id.raw(), &mut fc_conf) };
         if ret != 0 {
             log::warn!("Failure disabling flow control.");
@@ -245,7 +246,7 @@ impl Port {
     /// Sets RSS redirection table to full RSS_RETA_SIZE entries
     fn configure_rss_reta(&self) {
         log::info!("Configuring RSS redirection table...");
-        const GROUP_SIZE: usize = dpdk::RTE_RETA_GROUP_SIZE as usize;
+        const GROUP_SIZE: usize = dpdk::RTE_ETH_RETA_GROUP_SIZE as usize;
         let capacity = RSS_RETA_SIZE / GROUP_SIZE;
         let mut reta_conf: Vec<dpdk::rte_eth_rss_reta_entry64> = Vec::with_capacity(capacity);
 
@@ -294,13 +295,13 @@ impl Port {
             port_conf.rxmode.mq_mode = dpdk::rte_eth_rx_mq_mode_ETH_MQ_RX_RSS;
             port_conf.rx_adv_conf.rss_conf.rss_key = SYMMETRIC_RSS_KEY.as_ptr() as *mut u8;
             port_conf.rx_adv_conf.rss_conf.rss_key_len = RSS_KEY_LEN as u8;
-            port_conf.rx_adv_conf.rss_conf.rss_hf =
-                (dpdk::ETH_RSS_IP | dpdk::ETH_RSS_TCP | dpdk::ETH_RSS_UDP) as u64
-                    & dev_info.flow_type_rss_offloads;
+            port_conf.rx_adv_conf.rss_conf.rss_hf = 0;
+            // (dpdk::ETH_RSS_IPV4_CHECKSUM | dpdk::ETH_RSS_TCP | dpdk::ETH_RSS_UDP) as u64
+            //     & dev_info.flow_type_rss_offloads;
         }
 
-        let max_rx_pkt_len = mtu_to_max_frame_len(mtu as u32);
-        port_conf.rxmode.max_rx_pkt_len = cmp::max(dpdk::RTE_ETHER_MAX_LEN, max_rx_pkt_len);
+        // let max_rx_pkt_len = mtu_to_max_frame_len(mtu as u32);
+        // port_conf.rxmode.max_rx_pkt_len = cmp::max(dpdk::RTE_ETHER_MAX_LEN, max_rx_pkt_len);
 
         // turns on VLAN stripping if supported
         if dev_info.rx_offload_capa & dpdk::DEV_RX_OFFLOAD_VLAN_STRIP as u64 != 0 {

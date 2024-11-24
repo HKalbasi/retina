@@ -9,6 +9,34 @@ include!(concat!(env!("OUT_DIR"), "/dpdk.rs"));
 
 use std::os::raw::{c_char, c_int, c_uint, c_void};
 
+impl std::fmt::Debug for rte_gtp_psc_generic_hdr {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("rte_gtp_psc_generic_hdr")
+            .field("ext_hdr_len", &self.ext_hdr_len)
+            .field("_bitfield_align_1", &self._bitfield_align_1)
+            .field("_bitfield_1", &self._bitfield_1)
+            .field("data", &self.data)
+            .finish()
+    }
+}
+
+impl rte_ipv4_hdr {
+    #[cfg(not(dpdk_ge_2311))]
+    pub fn set_version_ihl(&mut self, version_ihl: u8) {
+        self.version_ihl = version_ihl;
+    }
+
+    #[cfg(dpdk_ge_2311)]
+    pub fn set_version_ihl(&mut self, version_ihl: u8) {
+        self.__bindgen_anon_1.version_ihl = version_ihl;
+    }
+}
+
+#[cfg(dpdk_ge_2311)]
+pub use rte_eth_rx_mq_mode_RTE_ETH_MQ_RX_RSS as rte_eth_rx_mq_mode_ETH_MQ_RX_RSS;
+#[cfg(dpdk_ge_2311)]
+pub use RTE_ETH_VLAN_STRIP_OFFLOAD as DEV_RX_OFFLOAD_VLAN_STRIP;
+
 #[link(name = "inlined")]
 extern "C" {
     fn rte_pktmbuf_free_(packet: *const rte_mbuf);
