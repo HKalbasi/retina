@@ -246,7 +246,7 @@ impl Port {
     /// Sets RSS redirection table to full RSS_RETA_SIZE entries
     fn configure_rss_reta(&self) {
         log::info!("Configuring RSS redirection table...");
-        const GROUP_SIZE: usize = dpdk::RTE_ETH_RETA_GROUP_SIZE as usize;
+        const GROUP_SIZE: usize = dpdk::RTE_RETA_GROUP_SIZE as usize;
         let capacity = RSS_RETA_SIZE / GROUP_SIZE;
         let mut reta_conf: Vec<dpdk::rte_eth_rss_reta_entry64> = Vec::with_capacity(capacity);
 
