@@ -46,6 +46,7 @@ jobs:
             echo "Compiling DPDK..." ;
             export STABLE=
             export VERSION=${{ matrix.dpdk_version }}
+            export DPDK_VERSION=${{ matrix.dpdk_version }}
             export PKG_CONFIG_PATH=$(pwd)/dpdk-$STABLE$VERSION/install/lib/x86_64-linux-gnu/pkgconfig/ ;
             export LD_LIBRARY_PATH=${LD_LIBRARY_PATH}:$(pwd)/dpdk-$STABLE$VERSION/install/lib/x86_64-linux-gnu/ ;
             export DPDK_PATH=$(pwd)/dpdk-$STABLE$VERSION/install/
