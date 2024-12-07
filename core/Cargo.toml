@@ -9,6 +9,7 @@ bindgen = "0.70.1"
 cc = "1.0.79"
 
 [dependencies]
+big-c = { path = "../big-c" }
 anyhow = "1.0.70"
 base64 = "0.13.1"
 bimap = "0.6.3"

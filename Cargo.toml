@@ -8,7 +8,7 @@ members = [
     # "examples/filter_stats",
     "examples/protocols",
     "examples/basic",
-    "examples/basic_file",
+    "examples/basic_file", "big-c",
 ]
 resolver = "2"
 

@@ -177,6 +177,7 @@ extern "C" fn launch_rx<S>(arg: *mut c_void) -> i32
 where
     S: Subscribable,
 {
+    big_c::foo();
     // enforce that workers cores cannot mutate runtime
     // TODO: make this *const and use Mutex for interior mutability
     let rx_cores = arg as *const BTreeMap<CoreId, RxCore<S>>;
