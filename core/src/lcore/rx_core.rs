@@ -4,6 +4,9 @@ use crate::conntrack::{ConnTracker, TrackerConfig};
 use crate::dpdk;
 use crate::memory::mbuf::Mbuf;
 use crate::port::{RxQueue, RxQueueType};
+use crate::stats::{
+    update_thread_local_stats, IGNORED_BY_PACKET_FILTER_BYTE, IGNORED_BY_PACKET_FILTER_PKT,
+};
 use crate::subscription::*;
 
 use std::sync::atomic::{AtomicBool, Ordering};
@@ -89,6 +92,10 @@ where
         while self.is_running.load(Ordering::Relaxed) {
             for rxqueue in self.rxqueues.iter() {
                 let mbufs: Vec<Mbuf> = self.rx_burst(rxqueue, 32);
+                if mbufs.is_empty() {
+                    // This is an idle iteration. We have time to update stats
+                    update_thread_local_stats();
+                }
                 for mbuf in mbufs.into_iter() {
                     // log::debug!("{:#?}", mbuf);
                     // log::debug!("Mark: {}", mbuf.mark());
@@ -106,6 +113,10 @@ where
                     if !actions.drop() {
                         self.subscription
                             .process_packet(mbuf, &mut conn_table, actions);
+                    } else {
+                        IGNORED_BY_PACKET_FILTER_PKT.set(IGNORED_BY_PACKET_FILTER_PKT.get() + 1);
+                        IGNORED_BY_PACKET_FILTER_BYTE
+                            .set(IGNORED_BY_PACKET_FILTER_BYTE.get() + mbuf.data_len() as u64);
                     }
                 }
             }
